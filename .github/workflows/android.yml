@@ -59,7 +59,7 @@ jobs:
             /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/${{matrix.arch}}-linux-android-strip /tmp/zink/lib/libOSMesa.so.8
           fi
       - name: Upload libraries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: libzink_${{matrix.arch}}
           path: /tmp/zink
