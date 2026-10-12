@@ -67,10 +67,13 @@ jobs:
             -Dopengl=true \
             -Dosmesa=true \
             -Dvulkan-drivers= \
-            -Dgallium-drivers=virgl \
+            -Dgallium-drivers=zink,virgl \
             -Dshared-glapi=false
           ninja -C "build-android-${{matrix.arch}}" install
-          # cp "build-android-${{matrix.arch}}/src/gallium/drivers/zink/libzink.a" /tmp/zink/lib/
+          # Preserve the built Zink static library for inspection; it is not a loadable driver by itself.
+          if [ -f "build-android-${{matrix.arch}}/src/gallium/drivers/zink/libzink.a" ]; then
+            cp "build-android-${{matrix.arch}}/src/gallium/drivers/zink/libzink.a" /tmp/zink/lib/
+          fi
           rm /tmp/zink/lib/libOSMesa.so /tmp/zink/lib/libOSMesa.so.8
           mv /tmp/zink/lib/libOSMesa.so.8.0.0 /tmp/zink/lib/libOSMesa.so.8
           cp /tmp/zink/lib/libOSMesa.so.8 /tmp/zink/lib/libOSMesa_unstripped.so.8
