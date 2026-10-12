@@ -85,16 +85,17 @@ jobs:
         run: |
           set -eu
 
-          # The DRI install should contain the real Gallium megadriver and its Zink alias.
-          test -e /tmp/zink/lib/dri/libgallium_dri.so
+          # Zink may be installed as its own DRI library; do not assume every Mesa
+          # configuration creates a libgallium_dri.so megadriver.
           test -e /tmp/zink/lib/dri/zink_dri.so
 
           echo "Files before converting symbolic links:"
-          find /tmp/zink -maxdepth 4 \( -name 'libgallium_dri.so' -o -name 'zink_dri.so' -o -name 'libGL.so*' -o -name 'libOSMesa.so*' \) -print
+          find /tmp/zink -maxdepth 4 \\( -name 'libgallium_dri.so' -o -name 'zink_dri.so' -o -name 'libGL.so*' -o -name 'libOSMesa.so*' \\) -print
 
           # Android archive managers often cannot create Unix symbolic links.
-          # Replace each link with a copy of its target so the extracted ZIP has ordinary files.
-          find /tmp/zink -type l -print0 | while IFS= read -r -d '' link; do
+          # Save the link list first so failures in the loop propagate to this step.
+          find /tmp/zink -type l -print0 > /tmp/zink-symlinks.list
+          while IFS= read -r -d '' link; do
             target="$(readlink -f "$link" || true)"
             if [ -n "$target" ] && [ -f "$target" ]; then
               tmp="${link}.regular-file"
@@ -105,11 +106,10 @@ jobs:
               echo "Could not resolve symbolic link: $link" >&2
               exit 1
             fi
-          done
+          done < /tmp/zink-symlinks.list
 
           echo "Final artifact files:"
           find /tmp/zink -maxdepth 4 -type f -print | sort
-          test -f /tmp/zink/lib/dri/libgallium_dri.so
           test -f /tmp/zink/lib/dri/zink_dri.so
 
       - name: Upload libraries
