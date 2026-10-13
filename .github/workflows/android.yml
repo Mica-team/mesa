@@ -3,6 +3,9 @@ name: Build Android
 on:
   [push, pull_request]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -117,3 +120,37 @@ jobs:
         with:
           name: libzink_${{matrix.arch}}
           path: /tmp/zink
+
+  publish-release:
+    name: Publish Mesa Zink release assets
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/21.2-virgl'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download architecture artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: libzink_*
+          path: artifacts
+
+      - name: Package release assets
+        run: |
+          set -eu
+          mkdir -p release
+          for arch in arm32 aarch64 x86_64; do
+            test -d "artifacts/libzink_$arch"
+            (cd "artifacts/libzink_$arch" && zip -qr "../../release/mesa-zink-$arch.zip" .)
+          done
+          ls -lh release
+
+      - name: Publish latest Mesa Zink assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mesa-zink-latest
+          name: Mesa Zink (latest successful build)
+          prerelease: true
+          make_latest: false
+          files: release/mesa-zink-*.zip
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
