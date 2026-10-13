@@ -70,7 +70,8 @@ jobs:
             -Dandroid-stub=true \
             -Dllvm=disabled \
             -Dxlib-lease=disabled \
-            -Degl=disabled \
+            -Degl=enabled \
+            -Degl-lib-suffix=_mesa \
             -Dgbm=disabled \
             -Dglx=dri \
             -Dglx-direct=true \
@@ -103,6 +104,8 @@ jobs:
           # Zink may be installed as its own DRI library; do not assume every Mesa
           # configuration creates a libgallium_dri.so megadriver.
           test -e /tmp/zink/lib/dri/zink_dri.so
+          # The Nether Launcher integration loads Mesa EGL by this exact filename.
+          test -f /tmp/zink/lib/libEGL_mesa.so
 
           echo "Files before converting symbolic links:"
           find /tmp/zink -maxdepth 4 \( -name 'libgallium_dri.so' -o -name 'zink_dri.so' -o -name 'libGL.so*' -o -name 'libOSMesa.so*' \) -print
