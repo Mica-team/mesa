@@ -90,7 +90,7 @@ jobs:
           test -e /tmp/zink/lib/dri/zink_dri.so
 
           echo "Files before converting symbolic links:"
-          find /tmp/zink -maxdepth 4 \\( -name 'libgallium_dri.so' -o -name 'zink_dri.so' -o -name 'libGL.so*' -o -name 'libOSMesa.so*' \\) -print
+          find /tmp/zink -maxdepth 4 \( -name 'libgallium_dri.so' -o -name 'zink_dri.so' -o -name 'libGL.so*' -o -name 'libOSMesa.so*' \) -print
 
           # Android archive managers often cannot create Unix symbolic links.
           # Save the link list first so failures in the loop propagate to this step.
