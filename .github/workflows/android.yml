@@ -50,6 +50,17 @@ jobs:
           cp -R /usr/include/GL/* include/GL/
           pip3 install mako
           export ANDROID_NDK_HOME="$ANDROID_SDK_ROOT/ndk-bundle"
+
+          # Zink needs a Vulkan implementation. Build Turnip (Freedreno Vulkan)
+          # for the Android ARM64 target; keep the x86_64 job Vulkan-free.
+          if [ "${{matrix.arch}}" = "aarch64" ]; then
+            VULKAN_DRIVERS=freedreno
+            FREEDRENO_KGSL=true
+          else
+            VULKAN_DRIVERS=
+            FREEDRENO_KGSL=false
+          fi
+
           meson "build-android-${{matrix.arch}}" \
             --prefix=/tmp/zink \
             --cross-file "android-${{matrix.arch}}" \
@@ -65,7 +76,8 @@ jobs:
             -Dglx-direct=true \
             -Dopengl=true \
             -Dosmesa=true \
-            -Dvulkan-drivers= \
+            -Dvulkan-drivers="$VULKAN_DRIVERS" \
+            -Dfreedreno-kgsl="$FREEDRENO_KGSL" \
             -Dgallium-drivers=zink,virgl \
             -Dshared-glapi=false
           ninja -C "build-android-${{matrix.arch}}" install
