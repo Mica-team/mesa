@@ -139,7 +139,7 @@ jobs:
   publish-release:
     name: Publish Mesa Zink release assets
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/21.2-virgl'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/zink-turnip-android'
     runs-on: ubuntu-22.04
     steps:
       - name: Download architecture artifacts
