@@ -51,6 +51,8 @@ jobs:
           # The legacy Android EGL platform sources include libdrm headers directly.
           # Debian installs these under /usr/include/libdrm, outside the current include paths.
           cp -R /usr/include/libdrm/* include/
+          # xf86drm.h is installed at the top level on Ubuntu, not in libdrm/.
+          cp /usr/include/xf86drm.h /usr/include/xf86drmMode.h include/
           pip3 install mako
           export ANDROID_NDK_HOME="$ANDROID_SDK_ROOT/ndk-bundle"
 
