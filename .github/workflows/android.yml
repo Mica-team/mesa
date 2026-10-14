@@ -48,6 +48,9 @@ jobs:
           cp -R /usr/include/X11 include/
           cp -R /usr/include/xcb include/
           cp -R /usr/include/GL/* include/GL/
+          # The legacy Android EGL platform sources include libdrm headers directly.
+          # Debian installs these under /usr/include/libdrm, outside the current include paths.
+          cp -R /usr/include/libdrm/* include/
           pip3 install mako
           export ANDROID_NDK_HOME="$ANDROID_SDK_ROOT/ndk-bundle"
 
