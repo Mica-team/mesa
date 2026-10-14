@@ -61,6 +61,7 @@ jobs:
             FREEDRENO_KGSL=false
           fi
 
+          # EGL requires shared glapi; disabling it makes Meson abort before compilation.
           meson "build-android-${{matrix.arch}}" \
             --prefix=/tmp/zink \
             --cross-file "android-${{matrix.arch}}" \
@@ -80,7 +81,6 @@ jobs:
             -Dvulkan-drivers="$VULKAN_DRIVERS" \
             -Dfreedreno-kgsl="$FREEDRENO_KGSL" \
             -Dgallium-drivers=zink,virgl \
-            # EGL requires shared glapi; disabling it makes Meson abort before compilation.
             -Dshared-glapi=true
           ninja -C "build-android-${{matrix.arch}}" install
 
