@@ -70,7 +70,8 @@ jobs:
             -Dandroid-stub=true \
             -Dllvm=disabled \
             -Dxlib-lease=disabled \
-            -Degl=disabled \
+            -Degl=enabled \
+            -Degl-lib-suffix=_mesa \
             -Dgbm=disabled \
             -Dglx=dri \
             -Dglx-direct=true \
@@ -79,7 +80,8 @@ jobs:
             -Dvulkan-drivers="$VULKAN_DRIVERS" \
             -Dfreedreno-kgsl="$FREEDRENO_KGSL" \
             -Dgallium-drivers=zink,virgl \
-            -Dshared-glapi=false
+            # EGL requires shared glapi; disabling it makes Meson abort before compilation.
+            -Dshared-glapi=true
           ninja -C "build-android-${{matrix.arch}}" install
 
           # Preserve the Zink static archive for inspection; it is not loadable by Mojo.
@@ -103,6 +105,8 @@ jobs:
           # Zink may be installed as its own DRI library; do not assume every Mesa
           # configuration creates a libgallium_dri.so megadriver.
           test -e /tmp/zink/lib/dri/zink_dri.so
+          # The Nether Launcher integration loads Mesa EGL by this exact filename.
+          test -f /tmp/zink/lib/libEGL_mesa.so
 
           echo "Files before converting symbolic links:"
           find /tmp/zink -maxdepth 4 \( -name 'libgallium_dri.so' -o -name 'zink_dri.so' -o -name 'libGL.so*' -o -name 'libOSMesa.so*' \) -print
@@ -136,7 +140,7 @@ jobs:
   publish-release:
     name: Publish Mesa Zink release assets
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/21.2-virgl'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/zink-turnip-android'
     runs-on: ubuntu-22.04
     steps:
       - name: Download architecture artifacts
