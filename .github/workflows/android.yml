@@ -80,7 +80,8 @@ jobs:
             -Dvulkan-drivers="$VULKAN_DRIVERS" \
             -Dfreedreno-kgsl="$FREEDRENO_KGSL" \
             -Dgallium-drivers=zink,virgl \
-            -Dshared-glapi=false
+            # EGL requires shared glapi; disabling it makes Meson abort before compilation.
+            -Dshared-glapi=true
           ninja -C "build-android-${{matrix.arch}}" install
 
           # Preserve the Zink static archive for inspection; it is not loadable by Mojo.
